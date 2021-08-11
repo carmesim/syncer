@@ -5,8 +5,9 @@
 
 bool is_regular_file(const char * const path) {
     struct stat path_stat;
-    stat(path, &path_stat);
-
+    if(stat(path, &path_stat) != 0) {
+        return false;
+    }
     return S_ISREG(path_stat.st_mode);
 }
 
@@ -16,7 +17,8 @@ bool file_exists(const char * const path) {
 
 bool is_directory(const char * const path ){
     struct stat path_stat;
-    stat(path, &path_stat);
-
+    if(stat(path, &path_stat) != 0) {
+        return false;
+    }
     return S_ISDIR(path_stat.st_mode);
 }
