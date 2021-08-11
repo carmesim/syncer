@@ -1,6 +1,7 @@
-#include <string.h> // For NULL,
+#include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "fileutils.h"
 #include "cli.h"
@@ -11,7 +12,7 @@ static void usage(const char * const program_name) {
 
 //! Will parse the command-line arguments into a `cli_opts_t` struct, after
 //! sanity checking the inputs
-cli_opts_t parse_opts(int argc, char ** argv) {
+cli_opts_t parse_opts(const int argc, char ** argv) {
     if(argc != 3) {
         usage(argv[0]);
         _exit(1);
@@ -30,7 +31,10 @@ cli_opts_t parse_opts(int argc, char ** argv) {
     }
 
     if(!dest_folder_exists) {
-        // TODO: create folder
+        if (mkdir(argv[2], 0777) != 0) {
+            fprintf(stderr, "error: failed to create destination folder ('%s')\n", argv[2]);
+        }
+        printf("warn: destination folder '%s' created.\n", argv[2]);
     }
 
     cli_opts_t opts;

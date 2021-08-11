@@ -3,8 +3,7 @@
 #include <unistd.h>
 
 
-bool is_regular_file(const char *path)
-{
+bool is_regular_file(const char * const path) {
     struct stat path_stat;
     stat(path, &path_stat);
 

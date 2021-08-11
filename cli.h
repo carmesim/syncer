@@ -9,6 +9,6 @@ typedef struct {
     char * destination_path;
 } cli_opts_t;
 
-cli_opts_t parse_opts(int argc, char ** argv);
+cli_opts_t parse_opts(const int argc, char ** argv);
 
 #endif // CLI_H
