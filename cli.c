@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "fileutils.h"
 #include "cli.h"
 
 static void usage(const char * const program_name) {
@@ -16,9 +17,20 @@ cli_opts_t parse_opts(int argc, char ** argv) {
         _exit(1);
     }
 
-    if (access(argv[1], F_OK ) != 0) {
+    if (!file_exists(argv[1])) {
         fprintf(stderr, "error: origin folder ('%s') does not exist\n", argv[1]);
         _exit(1);
+    }
+
+    const bool dest_folder_exists = file_exists(argv[2]);
+
+    if (dest_folder_exists && !is_directory(argv[2])) {
+        fprintf(stderr, "error: dest. path ('%s') is not a directory\n", argv[1]);
+        _exit(1);
+    }
+
+    if(!dest_folder_exists) {
+        // TODO: create folder
     }
 
     cli_opts_t opts;

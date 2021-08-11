@@ -5,7 +5,9 @@ CONFIG -= qt
 
 SOURCES += \
         cli.c \
+        fileutils.c \
         main.c
 
 HEADERS += \
-    cli.h
+    cli.h \
+    fileutils.h
