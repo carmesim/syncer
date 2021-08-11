@@ -25,7 +25,7 @@ cli_opts_t parse_opts(int argc, char ** argv) {
     const bool dest_folder_exists = file_exists(argv[2]);
 
     if (dest_folder_exists && !is_directory(argv[2])) {
-        fprintf(stderr, "error: dest. path ('%s') is not a directory\n", argv[1]);
+        fprintf(stderr, "error: dest. path ('%s') is not a directory\n", argv[2]);
         _exit(1);
     }
 
