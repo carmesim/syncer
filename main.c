@@ -58,6 +58,9 @@ int main(int argc, char ** argv) {
                 printf("it's not!\n");
                 copy_file(&opts, entry->d_name, file_buf);
             }
+
+            // Make sure that the child process doesn't spawn any more processes
+            return 0;
         }
     }
     pid_t wpid;
