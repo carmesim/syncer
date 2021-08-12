@@ -35,40 +35,21 @@ int main(int argc, char ** argv) {
         return 1;
     }
 
-    struct dirent * entry = readdir(origin_dir);
-
-    int count = 0;
-
     // percorre arquivos do diretório de origem (COLOCAR EM UMA FUNÇÃO DEPOIS)
-    printf("\n========= Files in %s =========\n",opts.origin_path);
-    while(entry != NULL){
+    for(
+        struct dirent * entry = readdir(origin_dir);
+        entry != NULL;
+        entry = readdir(origin_dir)
+    ){
         if(ENTRY_IS_A_REGULAR_FILE(entry)){
             strcpy(file_path, opts.origin_path);
             printf("File name: %s\n", entry->d_name);
             sprintf(file_path,"%s/%s", file_path, entry->d_name);
             time_t mt = get_mod_time(file_path);
-//            printf("Modified at: %d\n\n", mt);
             fmt_timestamp(last_modified_msg, mt);
             printf("File '%s' was last modified in %s\n", entry->d_name, last_modified_msg);
         }
         entry = readdir(origin_dir);
     }
-    printf("==============================================\n");
-
-//    // percorre arquivos do diretório de destino (COLOCAR EM UMA FUNÇÃO DEPOIS)
-//    printf("\n========= Files in %s =========\n",opts.destination_path);
-//    while(entity != NULL){
-//        if(entity->d_type == DT_REG){
-//            strcpy(file_path, opts.destination_path);
-//            struct utimbuf *utb;
-//            printf("File name: %s\n", entity->d_name);
-//            strcat(file_path, entity->d_name);
-//            time_t mt = get_mod_time(file_path);
-//            printf("Modified at: %d\n\n", mt);
-//        }
-//        entry = readdir(origin_dir);
-//    }
-//    printf("==============================================\n");
-
     return 0;
 }
