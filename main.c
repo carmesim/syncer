@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> // For malloc, free
 #include <sys/types.h> // For time_t
+#include <time.h>   // For
 #include <unistd.h> // For getopt
 #include <string.h> // For strcat
 #include <dirent.h> // For opendir
@@ -14,51 +15,60 @@
 #   define PATH_MAX 4096
 #endif
 
+static inline void fmt_timestamp(char * buf, time_t stamp) {
+    printf("ctime: %s\n", ctime(&stamp));
+    strftime(buf, 512, "%H:%M.%S %d/%m/%Y", localtime(&stamp));
+}
 
 int main(int argc, char ** argv) {
+    // Parse the command-line arguments
     cli_opts_t opts = parse_opts(argc, argv);
+    char file_path[PATH_MAX];
+    // Will hold strftime-formatted timestamps
+    char last_modified_msg[512] = { 0 };
 
     printf("%s: backing up '%s' into '%s'.\n", argv[0], opts.origin_path, opts.destination_path);
     
-    DIR* dir = opendir(argv[1]);
-    if(dir == NULL){
+    DIR* origin_dir = opendir(opts.origin_path);
+    if(origin_dir == NULL){
+        perror("opendir");
         return 1;
     }
 
-    struct dirent* entity;
-    entity = readdir(dir);
+    struct dirent * entry = readdir(origin_dir);
 
-    char file_path[PATH_MAX];
     int count = 0;
 
     // percorre arquivos do diretório de origem (COLOCAR EM UMA FUNÇÃO DEPOIS)
     printf("\n========= Files in %s =========\n",opts.origin_path);
-    while(entity != NULL){
-        if(entity->d_type == DT_REG){
+    while(entry != NULL){
+        if(ENTRY_IS_A_REGULAR_FILE(entry)){
             strcpy(file_path, opts.origin_path);
-            printf("File name: %s\n", entity->d_name);
-            sprintf(file_path,"%s/%s", file_path, entity->d_name);
+            printf("File name: %s\n", entry->d_name);
+            sprintf(file_path,"%s/%s", file_path, entry->d_name);
             time_t mt = get_mod_time(file_path);
-            printf("Modified at: %d\n\n", mt);
+//            printf("Modified at: %d\n\n", mt);
+            fmt_timestamp(last_modified_msg, mt);
+            printf("File '%s' was last modified in %s\n", entry->d_name, last_modified_msg);
         }
-        entity = readdir(dir);
+        entry = readdir(origin_dir);
     }
     printf("==============================================\n");
 
-    // percorre arquivos do diretório de destino (COLOCAR EM UMA FUNÇÃO DEPOIS)
-    printf("\n========= Files in %s =========\n",opts.destination_path);
-    while(entity != NULL){
-        if(entity->d_type == DT_REG){
-            strcpy(file_path, opts.destination_path);
-            struct utimbuf *utb;
-            printf("File name: %s\n", entity->d_name);
-            strcat(file_path, entity->d_name);
-            time_t mt = get_mod_time(file_path);
-            printf("Modified at: %d\n\n", mt);
-        }
-        entity = readdir(dir);
-    }
-    printf("==============================================\n");
+//    // percorre arquivos do diretório de destino (COLOCAR EM UMA FUNÇÃO DEPOIS)
+//    printf("\n========= Files in %s =========\n",opts.destination_path);
+//    while(entity != NULL){
+//        if(entity->d_type == DT_REG){
+//            strcpy(file_path, opts.destination_path);
+//            struct utimbuf *utb;
+//            printf("File name: %s\n", entity->d_name);
+//            strcat(file_path, entity->d_name);
+//            time_t mt = get_mod_time(file_path);
+//            printf("Modified at: %d\n\n", mt);
+//        }
+//        entry = readdir(origin_dir);
+//    }
+//    printf("==============================================\n");
 
     return 0;
 }
