@@ -23,6 +23,11 @@ cli_opts_t parse_opts(const int argc, char ** argv) {
         _exit(1);
     }
 
+    if (!is_directory(argv[1])) {
+        fprintf(stderr, "error: origin folder ('%s') is not a directory\n", argv[1]);
+        _exit(1);
+    }
+
     const bool dest_folder_exists = file_exists(argv[2]);
 
     if (dest_folder_exists && !is_directory(argv[2])) {
