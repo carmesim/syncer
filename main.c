@@ -7,11 +7,15 @@
 #include "cli.h"
 #include "fileutils.h"
 
+#include "linux/limits.h" // For PATH_MAX
 
-int main(int argc, char ** argv)
-{
+#ifndef PATH_MAX
+//! The maximum possible length for any given path in Linux
+#   define PATH_MAX 4096
+#endif
 
 
+int main(int argc, char ** argv) {
     cli_opts_t opts = parse_opts(argc, argv);
 
     printf("%s: backing up '%s' into '%s'.\n", argv[0], opts.origin_path, opts.destination_path);
@@ -24,7 +28,7 @@ int main(int argc, char ** argv)
     struct dirent* entity;
     entity = readdir(dir);
 
-    char* file_path = malloc(500*sizeof(char));// coloquei 500 por porquisse... mudar dps
+    char file_path[PATH_MAX];
     int count = 0;
 
     // percorre arquivos do diretório de origem (COLOCAR EM UMA FUNÇÃO DEPOIS)
@@ -32,7 +36,6 @@ int main(int argc, char ** argv)
     while(entity != NULL){
         if(entity->d_type == DT_REG){
             strcpy(file_path, opts.origin_path);
-            struct utimbuf *utb;
             printf("File name: %s\n", entity->d_name);
             sprintf(file_path,"%s/%s", file_path, entity->d_name);
             time_t mt = get_mod_time(file_path);
@@ -56,8 +59,6 @@ int main(int argc, char ** argv)
         entity = readdir(dir);
     }
     printf("==============================================\n");
-
-    free(file_path);
 
     return 0;
 }
