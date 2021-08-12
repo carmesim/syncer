@@ -9,13 +9,6 @@
 #include "cli.h"
 #include "fileutils.h"
 
-#include "linux/limits.h" // For PATH_MAX
-
-#ifndef PATH_MAX
-//! The maximum possible length for any given path in Linux
-#   define PATH_MAX 4096
-#endif
-
 static inline void fmt_timestamp(char * buf, time_t stamp) {
     strftime(buf, 512, "%H:%M.%S %d/%m/%Y", localtime(&stamp));
 }
@@ -23,7 +16,7 @@ static inline void fmt_timestamp(char * buf, time_t stamp) {
 int main(int argc, char ** argv) {
     // Parse the command-line arguments
     cli_opts_t opts = parse_opts(argc, argv);
-    char file_path[PATH_MAX];
+    char file_buf[PATH_MAX];
     // Will hold strftime-formatted timestamps
     char last_modified_msg[512] = { 0 };
     // Used when waiting for child processes
@@ -49,19 +42,22 @@ int main(int argc, char ** argv) {
             // a counterpart on the backup folder.
             pid_t pid = getpid();
 
-            snprintf(file_path, PATH_MAX, "%s/%s", opts.destination_path, entry->d_name);
+            snprintf(file_buf, PATH_MAX, "%s/%s", opts.destination_path, entry->d_name);
 
             printf("worker-%d: checking if '%s' is backed up... ", pid, entry->d_name);
-            if(file_exists(file_path)) {
+            if(file_exists(file_buf)) {
                 printf("it is!\n");
+                // Some file with the same name exists on the backup folder, now
+                // we must check if both have the same last modified timestamp
+                // The last moment (in seconds since Epoch) that this file was modified
+                time_t mt = get_mod_time(file_buf);
+                fmt_timestamp(last_modified_msg, mt);
+                printf("File '%s' was last modified in %s\n", entry->d_name, last_modified_msg);
             } else {
+                // The given file isn't backed up, so we have to do that
                 printf("it's not!\n");
+                copy_file(&opts, entry->d_name, file_buf);
             }
-
-            // The last moment (in seconds since Epoch) that this file was modified
-            time_t mt = get_mod_time(file_path);
-            fmt_timestamp(last_modified_msg, mt);
-            printf("File '%s' was last modified in %s\n", entry->d_name, last_modified_msg);
         }
     }
     pid_t wpid;
