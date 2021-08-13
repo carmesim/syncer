@@ -8,6 +8,17 @@
 
 #define COPY_BUF_SIZ 255
 
+mode_t permissions(const char * const path) {
+    struct stat path_stat;
+    if(stat(path, &path_stat) != 0) {
+        perror("fatal: permissions failed");
+        _exit(1);
+    }
+
+    return path_stat.st_mode;
+}
+
+
 bool is_regular_file(const char * const path) {
     struct stat path_stat;
     if(stat(path, &path_stat) != 0) {
@@ -45,6 +56,9 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
         _exit(1);
     }
 
+    // Get the permissions of the file being backed up
+    mode_t origin_permissions = permissions(buf);
+
     // buf will now contain the path of the backup file
     snprintf(buf, PATH_MAX, "%s/%s", opts->destination_path, file_name);
     int dest = open(buf, O_WRONLY | O_CREAT);
@@ -70,6 +84,10 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
         close(origin); close(dest);
         _exit(1);
     }
+
+    // Make sure that the copy being created has
+    // the same permissions as the original one.
+    fchmod(dest, origin_permissions);
 
     close(origin); close(dest);
 }
