@@ -9,16 +9,11 @@
 #include "cli.h"
 #include "fileutils.h"
 
-static inline void fmt_timestamp(char * buf, time_t stamp) {
-    strftime(buf, 512, "%H:%M.%S %d/%m/%Y", localtime(&stamp));
-}
-
 int main(int argc, char ** argv) {
     // Parse the command-line arguments
     cli_opts_t opts = parse_opts(argc, argv);
     char file_buf[PATH_MAX];
-    // Will hold strftime-formatted timestamps
-    char last_modified_msg[512] = { 0 };
+
     // Used when waiting for child processes
     int status = 0;
 
@@ -46,13 +41,14 @@ int main(int argc, char ** argv) {
 
             printf("worker-%d: checking if '%s' is backed up... ", pid, entry->d_name);
             if(file_exists(file_buf)) {
-                printf("it is!\n");
                 // Some file with the same name exists on the backup folder, now
                 // we must check if both have the same last modified timestamp
-                // The last moment (in seconds since Epoch) that this file was modified
-                time_t mt = get_mod_time(file_buf);
-                fmt_timestamp(last_modified_msg, mt);
-                printf("File '%s' was last modified in %s\n", entry->d_name, last_modified_msg);
+                if (same_last_modified_date(&opts, entry->d_name, file_buf)) {
+                    // Both files have the same last modified date,
+                    // so there are no operations left to do.
+                    printf("it is and they're sync'ed!!\n");
+                    return 0;
+                }
             } else {
                 // The given file isn't backed up, so we have to do that
                 printf("it's not!\n");

@@ -2,12 +2,18 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <time.h>
 #include <utime.h>
 #include <fcntl.h> // For open and related constants
 
 #include "fileutils.h"
 
 #define COPY_BUF_SIZ 255
+#define TIME_FMT_SIZ 120
+
+static inline void fmt_timestamp(char * buf, time_t stamp) {
+    strftime(buf, TIME_FMT_SIZ, "%H:%M.%S %d/%m/%Y", localtime(&stamp));
+}
 
 mode_t permissions(const char * const path) {
     struct stat path_stat;
@@ -115,6 +121,31 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
     close(origin); close(dest);
 }
 
+//! Checks if the file with name `file_name`, present in *both* opts->origin_path and opts->destination_path,
+//! have the same last modified date.
+//!
+//! Assumes that there is a file with the given name in both folders
+//! Assumes that `buf` has PATH_MAX bytes allocated
+bool same_last_modified_date(const cli_opts_t * const opts, const char * const file_name, char * buf) {
+    snprintf(buf, PATH_MAX, "%s/%s", opts->origin_path, file_name);
+    time_t orig_mod_time = get_mod_time(buf);
+
+    snprintf(buf, PATH_MAX, "%s/%s", opts->destination_path, file_name);
+    time_t dest_mod_time = get_mod_time(buf);
+
+    bool same_last_modified_date = orig_mod_time == dest_mod_time;
+    if (!same_last_modified_date) {
+        char time_fmt_1[TIME_FMT_SIZ], time_fmt_2[TIME_FMT_SIZ];
+        fmt_timestamp(time_fmt_1, orig_mod_time);
+        fmt_timestamp(time_fmt_2, orig_mod_time);
+        pid_t pid = getpid();
+        printf("worked-%d: Unsynchronized file found!\n", pid);
+        printf("worked-%d: '%s/%s' was last modified in %s\n", pid, opts->origin_path, file_name, time_fmt_1);
+        printf("worked-%d: '%s/%s' was last modified in %s\n", pid, opts->destination_path, file_name, time_fmt_2);
+    }
+
+    return orig_mod_time == dest_mod_time;
+}
 
 //! Gets the file's last modified time.
 time_t get_mod_time(const char * const path){
