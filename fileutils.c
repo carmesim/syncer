@@ -49,7 +49,6 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
 
     // buf will now contain the path of the file to be copied
     snprintf(buf, PATH_MAX, "%s/%s", opts->origin_path, file_name);
-    fprintf(stderr, "origin: %s\n", buf);
 
     int origin = open(buf, O_RDONLY);
     if(!origin) {
@@ -109,6 +108,9 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
         close(origin); close(dest);
         _exit(1);
     }
+
+    pid_t pid = getpid();
+    printf("worker-%d: successfully backed up '%s' into '%s'\n", pid, file_name, buf);
 
     close(origin); close(dest);
 }
