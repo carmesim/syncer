@@ -140,9 +140,9 @@ bool same_last_modified_date(const cli_opts_t * const opts, const char * const f
         fmt_timestamp(time_fmt_2, dest_mod_time);
         pid_t pid = getpid();
         printf("the backup is outdated!\n");
-        printf("worked-%d: Unsynchronized file found!\n", pid);
-        printf("worked-%d: '%s/%s' was last modified in %s\n", pid, opts->origin_path, file_name, time_fmt_1);
-        printf("worked-%d: '%s/%s' was last modified in %s\n", pid, opts->destination_path, file_name, time_fmt_2);
+        printf("worker-%d: Unsynchronized file found!\n", pid);
+        printf("worker-%d: '%s/%s' was last modified in %s\n", pid, opts->origin_path, file_name, time_fmt_1);
+        printf("worker-%d: '%s/%s' was last modified in %s\n", pid, opts->destination_path, file_name, time_fmt_2);
     }
 
     return orig_mod_time == dest_mod_time;
