@@ -49,6 +49,12 @@ int main(int argc, char ** argv) {
                     printf("it is and they're sync'ed!!\n");
                     return 0;
                 }
+                // The current backup is old
+                if (remove(file_buf) == -1) {
+                    perror("remove failed");
+                    return 1;
+                }
+                copy_file(&opts, entry->d_name, file_buf);
             } else {
                 // The given file isn't backed up, so we have to do that
                 printf("it's not!\n");
