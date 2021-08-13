@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <utime.h>
 #include <fcntl.h> // For open and related constants
 
 #include "fileutils.h"
@@ -56,14 +57,21 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
         _exit(1);
     }
 
-    // Get the permissions of the file being backed up
-    mode_t origin_permissions = permissions(buf);
+    // The `stat` of the file being cloned.
+    // Will be used to get the original file's permission mode and
+    // last modified time.
+    struct stat origin_stat;
+    if(stat(buf, &origin_stat) != 0) {
+        perror("fatal: stat failed in copy_file");
+        _exit(1);
+    }
 
     // buf will now contain the path of the backup file
     snprintf(buf, PATH_MAX, "%s/%s", opts->destination_path, file_name);
     int dest = open(buf, O_WRONLY | O_CREAT);
     if(dest < 0) {
         perror("fatal: open failed");
+        close(origin);
         _exit(1);
     }
 
@@ -87,7 +95,20 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
 
     // Make sure that the copy being created has
     // the same permissions as the original one.
-    fchmod(dest, origin_permissions);
+    fchmod(dest, origin_stat.st_mode);
+
+    // Make sure that the copy being created has
+    // the same "last modified" timestamp as the original one.
+    struct utimbuf times;
+    // Maintain the last accessed time
+    times.actime = origin_stat.st_atime;
+    // Maintain the last modified time
+    times.modtime = origin_stat.st_mtime;
+    if (utime(buf, &times) != 0) {
+        perror("fatal error: utime failed in copy_file");
+        close(origin); close(dest);
+        _exit(1);
+    }
 
     close(origin); close(dest);
 }
