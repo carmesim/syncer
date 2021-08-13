@@ -57,7 +57,7 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
     snprintf(buf, PATH_MAX, "%s/%s", opts->origin_path, file_name);
 
     int origin = open(buf, O_RDONLY);
-    if(!origin) {
+    if(origin < 0) {
         perror("fatal: open failed: ");
         _exit(1);
     }
