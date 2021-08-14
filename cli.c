@@ -13,6 +13,7 @@ static void usage(const char * const program_name) {
 //! Will parse the command-line arguments into a `cli_opts_t` struct, after
 //! sanity checking the inputs
 cli_opts_t parse_opts(const int argc, char ** argv) {
+    
     if(argc != 3) {
         usage(argv[0]);
         _exit(1);
@@ -48,6 +49,16 @@ cli_opts_t parse_opts(const int argc, char ** argv) {
     // No need to strdup here since argvs survive throughout the entire main function
     opts.origin_path = argv[1];
     opts.destination_path = argv[2];
+
+    // Remove ending slash if it exists
+    if(opts.origin_path[strlen(opts.origin_path)-1] == '/'){
+        opts.origin_path[strlen(opts.origin_path)-1] = '\0';
+    }
+
+    // Remove ending slash if it exists
+    if(opts.destination_path[strlen(opts.destination_path)-1] == '/'){
+        opts.destination_path[strlen(opts.destination_path)-1] = '\0';
+    }
 
     return opts;
 }
