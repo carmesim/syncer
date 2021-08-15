@@ -8,7 +8,7 @@
 #include "cli.h"
 
 static void usage(const char * const program_name) {
-    printf("Usage: %s ORIGIN-FOLDER DEST-FOLDER\n", program_name);
+    printf("Usage: %s ORIGIN-FOLDER DEST-FOLDER UPDATE-TIME-IN-MS\n", program_name);
 }
 
 //! Will parse the command-line arguments into a `cli_opts_t` struct, after
