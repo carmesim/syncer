@@ -51,5 +51,15 @@ cli_opts_t parse_opts(const int argc, char ** argv) {
     opts.destination_path = argv[2];
     opts.update_time = atoi (argv[3]);
 
+    // Remove ending slash if it exists
+    if(opts.origin_path[strlen(opts.origin_path)-1] == '/'){
+        opts.origin_path[strlen(opts.origin_path)-1] = '\0';
+    }
+
+    // Remove ending slash if it exists
+    if(opts.destination_path[strlen(opts.destination_path)-1] == '/'){
+        opts.destination_path[strlen(opts.destination_path)-1] = '\0';
+    }
+
     return opts;
 }
