@@ -7,6 +7,8 @@ typedef struct {
     char * origin_path;
     //! The folder that will receive the back up
     char * destination_path;
+    //the time to update the directory
+    int update_time;
 } cli_opts_t;
 
 cli_opts_t parse_opts(const int argc, char ** argv);
