@@ -17,7 +17,7 @@ static inline void fmt_timestamp(char * buf, time_t stamp) {
 
 mode_t permissions(const char * const path) {
     struct stat path_stat;
-    if(stat(path, &path_stat) != 0) {
+    if(lstat(path, &path_stat) != 0) {
         perror("fatal: permissions failed");
         _exit(1);
     }
@@ -28,7 +28,7 @@ mode_t permissions(const char * const path) {
 
 bool is_regular_file(const char * const path) {
     struct stat path_stat;
-    if(stat(path, &path_stat) != 0) {
+    if(lstat(path, &path_stat) != 0) {
         return false;
     }
     return S_ISREG(path_stat.st_mode);
@@ -40,7 +40,7 @@ bool file_exists(const char * const path) {
 
 bool is_directory(const char * const path ){
     struct stat path_stat;
-    if(stat(path, &path_stat) != 0) {
+    if(lstat(path, &path_stat) != 0) {
         return false;
     }
     return S_ISDIR(path_stat.st_mode);
@@ -66,7 +66,7 @@ void copy_file(const cli_opts_t * const opts, const char * const file_name, char
     // Will be used to get the original file's permission mode and
     // last modified time.
     struct stat origin_stat;
-    if(stat(buf, &origin_stat) != 0) {
+    if(lstat(buf, &origin_stat) != 0) {
         perror("fatal: stat failed in copy_file");
         _exit(1);
     }
@@ -150,7 +150,7 @@ bool same_last_modified_date(const cli_opts_t * const opts, const char * const f
 //! Gets the file's last modified time.
 time_t get_mod_time(const char * const path){
     struct stat path_stat;
-    if(stat(path, &path_stat) != 0) {
+    if(lstat(path, &path_stat) != 0) {
         perror(path);
         return -1;
     }
