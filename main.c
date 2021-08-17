@@ -28,7 +28,7 @@ int main(int argc, char ** argv) {
             return 1;
         }
 
-        // percorre arquivos do diretório de origem (COLOCAR EM UMA FUNÇÃO DEPOIS)
+        // Run trough the files in the origin directory
         for(
             struct dirent * entry = readdir(origin_dir);
             entry != NULL;
