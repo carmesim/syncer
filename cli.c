@@ -19,7 +19,7 @@ cli_opts_t parse_opts(const int argc, char ** argv) {
         _exit(1);
     }
 
-    if (!file_exists(argv[1])) {
+    if (!file_exists(argv[1])) { //orign directory
         fprintf(stderr, "error: origin folder ('%s') does not exist\n", argv[1]);
         _exit(1);
     }
@@ -29,7 +29,7 @@ cli_opts_t parse_opts(const int argc, char ** argv) {
         _exit(1);
     }
 
-    const bool dest_folder_exists = file_exists(argv[2]);
+    const bool dest_folder_exists = file_exists(argv[2]); //destination
 
     if (dest_folder_exists && !is_directory(argv[2])) {
         fprintf(stderr, "error: dest. path ('%s') is not a directory\n", argv[2]);
